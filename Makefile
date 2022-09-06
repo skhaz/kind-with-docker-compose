@@ -1,4 +1,4 @@
-.PHONY: clean cluster compose context coverage install lint test update vet web
+.PHONY: clean cluster compose context deploy
 
 .SILENT:
 
@@ -12,8 +12,11 @@ cluster: clean
 kind.conf: context
 	kubectl config view --raw | sed -E 's/127.0.0.1|localhost/host.docker.internal/' > kind.conf
 
+compose: kind.conf
+	docker-compose up --build
+
 context:
 	kubectl config use-context kind-kind
 
-compose: kind.conf
-	docker-compose up --build
+deploy: context
+	kubectl create deployment hello-node --image=k8s.gcr.io/echoserver
